@@ -1,17 +1,26 @@
-名字: 建造暗影
-在: [推, workflow_dispatch]
-工作:
-建筑:
+name: Build eBPF
+
+on:
+  workflow_dispatch:   # 手动触发
+  push:
+    paths:
+      - 'bpf.c'
+
+jobs:
+  build:
     runs-on: ubuntu-latest
-步骤:
-    - 用途: actions/checkout@v4
-    - 名字: 安装部
-跑: |
-sudo apt更新
-sudo apt install -y cmake llvm-14 clang-14 libbpf-dev linux-headers-generic
-    - 名字: 构建eBPF+native+zip
-跑: bash build.sh
-    - 用途: actions/upload-artifact@v4
-与:
-名字: ShadowOne-magisk
-路径: ShadowOne-v*.zip
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang
+        run: sudo apt-get update && sudo apt-get install -y clang llvm
+
+      - name: Compile eBPF
+        run: |
+          clang -O2 -target bpf -c bpf.c -o bpf.o
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bpf.o
+          path: bpf.o
